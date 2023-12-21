@@ -2,13 +2,20 @@ import pygame
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, surface):
         super().__init__()
         self.import_characters_assets()
         self.animation_speed = 0.15
         self.frame_index = 0
         self.image = self.animations['idle'][self.frame_index]
         self.rect = self.image.get_rect(topleft = pos)
+
+        #dust particles
+        self.import_dust_run_particles()
+        self.dust_animation_speed = 0.5
+        self.dust_frame_index = 0
+        self.display_surface = surface
+
 
         #movimentação do player
         self.direction = pygame.math.Vector2(0, 0)
@@ -31,6 +38,9 @@ class Player(pygame.sprite.Sprite):
         for animation in self.animations.keys():
             full_path = character_path + animation
             self.animations[animation] = import_folder(full_path)
+
+    def import_dust_run_particles(self):
+        self.dust_run_particles = import_folder('graphics/character/dust_particles/run')
 
     def animate(self):
         animation = self.animations[self.status]
@@ -60,9 +70,23 @@ class Player(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(topleft = self.rect.topleft)
         elif self.on_ceiling:
             self.rect = self.image.get_rect(midtop = self.rect.midtop)
-            
 
+    def run_dust_animation(self):
+        if self.status == 'run' and self.on_ground:
+            self.dust_frame_index += self.dust_animation_speed
+            if self.dust_frame_index >= len(self.dust_run_particles):
+                self.dust_frame_index = 0
         
+        dust_paticle = self.dust_run_particles[int(self.dust_frame_index)]
+
+        if self.facing_right:
+            pos = self.rect.bottomleft - pygame.math.Vector2(6,10)
+            self.display_surface.blit(dust_paticle, pos)
+        else:
+            pos = self.rect.bottomright - pygame.math.Vector2(6,10)
+            flipped_dust_particle = pygame.transform.flip(dust_paticle, True, False)
+            self.display_surface.blit(flipped_dust_particle, pos)
+
 
     def get_input(self):
 
@@ -102,4 +126,6 @@ class Player(pygame.sprite.Sprite):
         self.get_input()
         self.get_status()
         self.animate()
+        self.run_dust_animation()
+        
         
