@@ -2,7 +2,7 @@ import pygame
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, surface):
+    def __init__(self, pos, surface, create_jump_particles):
         super().__init__()
         self.import_characters_assets()
         self.animation_speed = 0.15
@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.dust_animation_speed = 0.5
         self.dust_frame_index = 0
         self.display_surface = surface
+        self.create_jump_particles = create_jump_particles
 
 
         #movimentação do player
@@ -30,6 +31,7 @@ class Player(pygame.sprite.Sprite):
         self.on_right = False
         self.on_left = False
         self.facing_right = True
+        self.parado = True
 
     def import_characters_assets(self):
         character_path = "graphics/character/"
@@ -74,18 +76,18 @@ class Player(pygame.sprite.Sprite):
     def run_dust_animation(self):
         if self.status == 'run' and self.on_ground:
             self.dust_frame_index += self.dust_animation_speed
-            if self.dust_frame_index >= len(self.dust_run_particles):
+            if self.dust_frame_index >= len(self.dust_run_particles) or self.parado:
                 self.dust_frame_index = 0
         
-        dust_paticle = self.dust_run_particles[int(self.dust_frame_index)]
+            dust_paticle = self.dust_run_particles[int(self.dust_frame_index)]
 
-        if self.facing_right:
-            pos = self.rect.bottomleft - pygame.math.Vector2(6,10)
-            self.display_surface.blit(dust_paticle, pos)
-        else:
-            pos = self.rect.bottomright - pygame.math.Vector2(6,10)
-            flipped_dust_particle = pygame.transform.flip(dust_paticle, True, False)
-            self.display_surface.blit(flipped_dust_particle, pos)
+            if self.facing_right:
+                pos = self.rect.bottomleft - pygame.math.Vector2(6,10)
+                self.display_surface.blit(dust_paticle, pos)
+            else:
+                pos = self.rect.bottomright - pygame.math.Vector2(6,10)
+                flipped_dust_particle = pygame.transform.flip(dust_paticle, True, False)
+                self.display_surface.blit(flipped_dust_particle, pos)
 
 
     def get_input(self):
@@ -95,14 +97,20 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.direction.x = 1
             self.facing_right = True
+            self.parado = False
+
         elif keys[pygame.K_LEFT]:
             self.direction.x = -1
             self.facing_right = False
+            self.parado = False
         else:
             self.direction.x = 0
+            self.parado = True
 
         if keys[pygame.K_SPACE] and self.on_ground:
             self.jump()
+            self.create_jump_particles(self.rect.midbottom)
+            self.parado = True
     
     def get_status(self):
         if self.direction.y < 0:
