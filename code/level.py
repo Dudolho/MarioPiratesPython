@@ -1,18 +1,27 @@
 import pygame
-from support import import_csv_layout
+from support import import_cut_graphics, import_csv_layout
 from settings import tile_size
-from tiles import Tile
+from tiles import Tile, StaticTile, Crate
 
 
 class Level():
     def __init__(self, level_data, surface):
         #setup geral
         self.display_surface = surface
-        self.world_shift = 0
+        self.world_shift = -10
 
         #setup do terreno
         terrain_layout = import_csv_layout(level_data['terrain'])
-        self.terrain_sprite = self.create_tile_group(terrain_layout, 'terrain')
+        self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
+
+        #setup da grama
+        grass_layout = import_csv_layout(level_data['grass'])
+        self.grass_sprites = self.create_tile_group(grass_layout, 'grass')   
+
+        #crates
+        crate_layout = import_csv_layout(level_data['crates'])
+        self.crate_sprites = self.create_tile_group(crate_layout, 'crates')       
+
 
     def create_tile_group(self, layout, type):
         sprite_group = pygame.sprite.Group()
@@ -23,12 +32,31 @@ class Level():
                     y = row_index * tile_size
 
                     if type == 'terrain':
-                        sprite = Tile(tile_size, x, y)
-                        sprite_group.add(sprite)
+                        terrain_tile_list = import_cut_graphics('graphics/terrain/terrain_tiles.png')
+                        tile_surface = terrain_tile_list[int(val)]
+                        sprite = StaticTile(tile_size, x, y, tile_surface)
+                    
+                    if type == 'grass':
+                        grass_tile_list = import_cut_graphics('graphics/decoration/grass/grass.png')
+                        tile_surface = grass_tile_list[int(val)]
+                        sprite = StaticTile(tile_size, x, y, tile_surface)
+                    
+                    if type == 'crates':
+                        sprite = Crate(tile_size, x, y)
+
+                    sprite_group.add(sprite)
 
         return sprite_group
 
     def run(self):
         #rodar todo nivel
-        self.terrain_sprite.draw(self.display_surface)
-        self.terrain_sprite.update(self.world_shift)
+        self.terrain_sprites.update(self.world_shift)
+        self.terrain_sprites.draw(self.display_surface)
+
+        #grass 
+        self.grass_sprites.update(self.world_shift)
+        self.grass_sprites.draw(self.display_surface)
+
+        #crate
+        self.crate_sprites.update(self.world_shift)
+        self.crate_sprites.draw(self.display_surface)
