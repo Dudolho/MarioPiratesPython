@@ -4,6 +4,7 @@ from settings import *
 from level import Level
 from game_data import level_0
 
+
 pygame.init()
 
 screen = pygame.display.set_mode((screen_width, screen_hight))
@@ -16,7 +17,7 @@ while True:
             pygame.quit()
             sys.exit()
     
-    screen.fill('black')
+    screen.fill('gray')
     level.run()
     #framerate
     pygame.display.update()
