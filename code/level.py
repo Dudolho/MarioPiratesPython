@@ -1,11 +1,11 @@
 import pygame
-from player import Player
 from support import import_cut_graphics, import_csv_layout
 from settings import tile_size, screen_hight
 from tiles import Tile, StaticTile, Crate, Coin, Palm
 from enemy import Enemy
 from decoration import Sky, Water, Clouds
 from particles import Particle
+from player import Player
 
 
 
@@ -112,8 +112,7 @@ class Level():
                 x = col_index * tile_size
                 y = row_index * tile_size
                 if val == '0':
-                    sprite = Player((x,y), self.display_surface, self.create_jump_particles)
-
+                    sprite = Player((x, y), self.display_surface, self.create_jump_particles)
                 if val == '1':
                     hat_suface = pygame.image.load('graphics/character/hat.png').convert_alpha()
                     sprite = StaticTile(tile_size, x, y, hat_suface)
